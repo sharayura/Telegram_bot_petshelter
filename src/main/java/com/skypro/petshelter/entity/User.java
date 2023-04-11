@@ -14,14 +14,33 @@ public class User {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private Integer stage;
-
     @Column
     private String contact;
 
+    @Column(name = "days_trial")
+    private Integer daysTrial;
+
+    @Column(name = "dog_name")
+    private String dogName;
+
     public Long getChatId() {
         return chatId;
+    }
+
+    public Integer getDaysTrial() {
+        return daysTrial;
+    }
+
+    public void setDaysTrial(Integer daysTrial) {
+        this.daysTrial = daysTrial;
+    }
+
+    public String getDogName() {
+        return dogName;
+    }
+
+    public void setDogName(String dogName) {
+        this.dogName = dogName;
     }
 
     public void setChatId(Long chatId) {
@@ -34,14 +53,6 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Integer getStage() {
-        return stage;
-    }
-
-    public void setStage(Integer stage) {
-        this.stage = stage;
     }
 
     public String getContact() {

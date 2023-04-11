@@ -3,8 +3,9 @@
 -- changeset yuri:1
 CREATE TABLE if not exists users
 (
-    chat_id BIGINT NOT NULL PRIMARY KEY,
-    name    TEXT   NOT NULL,
-    stage   INT    NOT NULL,
-    contact TEXT
+    chat_id    BIGINT NOT NULL PRIMARY KEY,
+    name       TEXT   NOT NULL,
+    contact    TEXT,
+    days_trial INTEGER,
+    dog_name   TEXT
 );

@@ -4,9 +4,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
-import com.skypro.petshelter.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,15 +16,14 @@ import java.util.List;
 public class TelegramBotUpdatesListener implements UpdatesListener {
     private final TelegramBot telegramBot;
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
-    private final UserRepository userRepository;
     private final TelegramBotUpdatesService telegramBotUpdatesService;
+    private final VolunteersService volunteersService;
 
     public TelegramBotUpdatesListener(TelegramBot telegramBot,
-                                      UserRepository userRepository,
-                                      TelegramBotUpdatesService telegramBotUpdatesService) {
+                                      TelegramBotUpdatesService telegramBotUpdatesService, VolunteersService volunteersService) {
         this.telegramBot = telegramBot;
-        this.userRepository = userRepository;
         this.telegramBotUpdatesService = telegramBotUpdatesService;
+        this.volunteersService = volunteersService;
     }
 
     @PostConstruct
@@ -42,24 +39,36 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 Message message = update.message();
                 Long chatId = message.chat().id();
                 String text = message.text();
+                String userName = message.chat().username();
+                String firstName = message.chat().username();
 
-                if ("/start".equals(text) && !userRepository.existsById(chatId)) {
-                    String name = message.chat().firstName();
-                    telegramBotUpdatesService.addUser(chatId, name);
-                    SendMessage menu = new SendMessage(chatId, name + ", привет!")
-                            .replyMarkup(new ReplyKeyboardMarkup(new String[][]{
-                                    {"Информация о приюте", "Как взять собаку"},
-                                    {"Прислать отчет", "Позвать волонтера"}
-                            }).resizeKeyboard(true));
-                    telegramBot.execute(menu);
+                if ("/start".equals(text)) {
+                    telegramBot.execute(telegramBotUpdatesService.start(chatId, firstName));
                 }
-                if ("Информация о приюте".equals(text)) {
+
+                if ("Информация о приюте".equals(text) || "/info".equals(text)) {
                     SendMessage reply = new SendMessage(chatId,
                             """
-                                    Я телеграм-бот приюта животных из Астаны, могу дать информацию о приюте
-                                    и о том, как взять себе животное из приюта. 
-                                     """);
+                                    Я телеграм-бот приюта животных из Астаны! 
+                                    Могу дать информацию о приюте и о том, как взять себе животное из приюта. 
+                                    """);
                     telegramBot.execute(reply);
+                    telegramBot.execute(telegramBotUpdatesService.stage1(chatId));
+                }
+
+                if ("Как взять собаку".equals(text) || "/take".equals(text)) {
+                    telegramBot.execute(telegramBotUpdatesService.stage2(chatId));
+                }
+
+                if ("Прислать отчет".equals(text) || "/report".equals(text)) {
+                    telegramBot.execute(telegramBotUpdatesService.stage3(chatId));
+                }
+
+                if ("Позвать волонтера".equals(text) || "/call".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId, firstName
+                            + ", спасибо за обращение, наши волонтеры скоро свяжутся с Вами!");
+                    telegramBot.execute(reply);
+                    volunteersService.call(userName);
                 }
 
             });

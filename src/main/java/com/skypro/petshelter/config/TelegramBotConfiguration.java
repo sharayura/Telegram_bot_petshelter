@@ -22,12 +22,12 @@ public class TelegramBotConfiguration {
     public TelegramBot telegramBot(@Value("${telegram.bot.token}") String token) {
         TelegramBot bot = new TelegramBot(token);
         bot.execute(new DeleteMyCommands());
-//        bot.execute(new SetMyCommands(
-//                new BotCommand("/info", "Узнать информацию о приюте"),
-//                new BotCommand("/take", "Как взять собаку из приюта"),
-//                new BotCommand("/report", "Прислать отчет о питомце"),
-//                new BotCommand("/call", "Позвать волонтера")));
-
+        bot.execute(new SetMyCommands(
+                new BotCommand("/start", "Начнем общение"),
+                new BotCommand("/info", "Узнать информацию о приюте"),
+                new BotCommand("/take", "Как взять собаку из приюта"),
+                new BotCommand("/report", "Прислать отчет о питомце"),
+                new BotCommand("/call", "Позвать волонтера")));
         return bot;
     }
 }
