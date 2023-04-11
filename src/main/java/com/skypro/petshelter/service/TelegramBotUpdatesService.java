@@ -13,9 +13,11 @@ import javax.transaction.Transactional;
 public class TelegramBotUpdatesService {
 
     private final UserRepository userRepository;
+    private final VolunteersService volunteersService;
 
-    public TelegramBotUpdatesService(UserRepository userRepository, VolunteerRepository volunteerRepository) {
+    public TelegramBotUpdatesService(UserRepository userRepository, VolunteerRepository volunteerRepository, VolunteersService volunteersService) {
         this.userRepository = userRepository;
+        this.volunteersService = volunteersService;
     }
 
     @Transactional
@@ -63,6 +65,11 @@ public class TelegramBotUpdatesService {
                         {"Форма ежедневного отчета", "Позвать волонтера"}
                 }).resizeKeyboard(true));
     }
+
+    public void call(String userName, Long chatId){
+            String contacts = userRepository.findById(chatId).orElseThrow().getContact();
+            volunteersService.call(userName, contacts);
+        }
 
 
 }

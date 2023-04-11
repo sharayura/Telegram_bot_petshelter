@@ -5,6 +5,7 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
+import liquibase.pro.packaged.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -68,7 +69,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     SendMessage reply = new SendMessage(chatId, firstName
                             + ", спасибо за обращение, наши волонтеры скоро свяжутся с Вами!");
                     telegramBot.execute(reply);
-                    volunteersService.call(userName);
+                    telegramBotUpdatesService.call(userName, chatId);
                 }
 
             });

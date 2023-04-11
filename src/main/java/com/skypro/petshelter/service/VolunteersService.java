@@ -17,10 +17,10 @@ public class VolunteersService {
     }
 
 
-    public void call(String userName) {
+    public void call(String userName, String contacts) {
         volunteerRepository.findAll().forEach(volunteer -> {
             SendMessage message = new SendMessage(volunteer.getChatId(),
-                    "Пожалуйста, свяжитесь с @" + userName);
+                    "Пожалуйста, свяжитесь с @" + userName + ". Контактные данные: " + contacts);
             telegramBot.execute(message);
 
         });
