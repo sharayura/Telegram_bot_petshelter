@@ -27,6 +27,7 @@ public class TelegramBotConfiguration {
                 new BotCommand("/info", "Узнать информацию о приюте"),
                 new BotCommand("/take", "Как взять собаку из приюта"),
                 new BotCommand("/report", "Прислать отчет о питомце"),
+                new BotCommand("/contact", "Ваши контактные данные"),
                 new BotCommand("/call", "Позвать волонтера")));
         return bot;
     }

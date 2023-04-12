@@ -30,5 +30,34 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @PutMapping("give-dog")
+    public ResponseEntity<User> giveDog(@RequestParam Long chatId,
+                                        @RequestParam String dogName) {
+        if (userService.findUser(chatId) == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(userService.moveDog(chatId, dogName));
+    }
+
+    @PutMapping("deprive-dog")
+    public ResponseEntity<User> depriveDog(@RequestParam Long chatId,
+                                           @RequestParam String dogName) {
+        if (userService.findUser(chatId) == null
+                || !dogName.equals(userService.findUser(chatId).getDogName())) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(userService.moveDog(chatId, null));
+    }
+
+    @PutMapping("set-trial")
+    public ResponseEntity<User> setTrialDays(@RequestParam Long chatId,
+                                             @RequestParam Integer trialDays) {
+        if (userService.findUser(chatId) == null
+                || userService.findUser(chatId).getDogName() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(userService.setTrialDays(chatId, trialDays));
+    }
+
 
 }

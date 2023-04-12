@@ -32,4 +32,34 @@ public class UserService {
         userRepository.deleteById(chatId);
         return user;
     }
+
+    public User findUser(Long chatId) {
+        return userRepository.findById(chatId).orElse(null);
+    }
+
+    @Transactional
+    public User moveDog(Long chatId, String dogName) {
+        User user = userRepository.findById(chatId).orElseThrow();
+        user.setDogName(dogName);
+        user.setDaysTrial(30);
+        user.setFailsInRow(0);
+        if (dogName == null) {
+            user.setDaysTrial(null);
+        }
+        return user;
+    }
+
+    @Transactional
+    public User setTrialDays(Long chatId, Integer daysTrial) {
+        User user = userRepository.findById(chatId).orElseThrow();
+        user.setDaysTrial(daysTrial);
+        return user;
+    }
+
+    @Transactional
+    public User setContacts(Long chatId, String contact) {
+        User user = userRepository.findById(chatId).orElseThrow();
+        user.setContact(contact);
+        return user;
+    }
 }
