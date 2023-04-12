@@ -23,6 +23,9 @@ public class User {
     @Column(name = "dog_name")
     private String dogName;
 
+    @Column(name = "fails_in_row")
+    public int failsInRow;
+
     public Long getChatId() {
         return chatId;
     }

@@ -41,7 +41,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 Long chatId = message.chat().id();
                 String text = message.text();
                 String userName = message.chat().username();
-                String firstName = message.chat().username();
+                String firstName = message.chat().firstName();
+                firstName = (firstName == null) ? "User" : firstName;
 
                 if ("/start".equals(text)) {
                     telegramBot.execute(telegramBotUpdatesService.start(chatId, firstName));
