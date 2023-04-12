@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/scripts/user-data.sql
+  - include:
+      file: liquibase/scripts/volunteer-data.sql
