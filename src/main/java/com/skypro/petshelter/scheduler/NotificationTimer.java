@@ -6,6 +6,8 @@ import com.skypro.petshelter.repositories.UserRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
+
 @Component
 public class NotificationTimer {
 
@@ -17,7 +19,8 @@ public class NotificationTimer {
         this.userRepository = userRepository;
     }
 
-    @Scheduled(cron = "0 0 21 * * ?")
+    @Scheduled(cron = "0 23 13 * * ?")
+    @Transactional
     public void endTrial() {
         userRepository.findUsersByDaysTrialNotNull().forEach(user -> {
             if (user.getDaysTrial() == 0) {
