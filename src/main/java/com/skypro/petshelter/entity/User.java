@@ -26,6 +26,14 @@ public class User {
     @Column(name = "fails_in_row")
     public int failsInRow;
 
+    public int getFailsInRow() {
+        return failsInRow;
+    }
+
+    public void setFailsInRow(int failsInRow) {
+        this.failsInRow = failsInRow;
+    }
+
     public Long getChatId() {
         return chatId;
     }
