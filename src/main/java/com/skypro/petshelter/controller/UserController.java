@@ -1,5 +1,7 @@
 package com.skypro.petshelter.controller;
 
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.request.SendMessage;
 import com.skypro.petshelter.entity.User;
 import com.skypro.petshelter.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final TelegramBot telegramBot;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, TelegramBot telegramBot) {
         this.userService = userService;
+        this.telegramBot = telegramBot;
     }
 
     @PostMapping("add")
@@ -46,6 +50,9 @@ public class UserController {
                 || !dogName.equals(userService.findUser(chatId).getDogName())) {
             return ResponseEntity.notFound().build();
         }
+        SendMessage message = new SendMessage(chatId,
+                "К сожалению, Вы не прошли испытательный срок, верните бедное животное!!!");
+        telegramBot.execute(message);
         return ResponseEntity.ok(userService.moveDog(chatId, null));
     }
 
@@ -56,6 +63,9 @@ public class UserController {
                 || userService.findUser(chatId).getDogName() == null) {
             return ResponseEntity.notFound().build();
         }
+        SendMessage message = new SendMessage(chatId,
+                "Ваш испытательный срок изменен, осталось еще " + trialDays + " дней.");
+        telegramBot.execute(message);
         return ResponseEntity.ok(userService.setTrialDays(chatId, trialDays));
     }
 
