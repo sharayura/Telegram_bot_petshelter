@@ -19,13 +19,13 @@ public class UserController {
         this.telegramBot = telegramBot;
     }
 
-    @PostMapping("add")
+    @PostMapping
     public ResponseEntity<User> addUser(@RequestParam Long chatId,
                                         @RequestParam String name) {
         return ResponseEntity.ok(userService.addUser(chatId, name));
     }
 
-    @DeleteMapping("delete")
+    @DeleteMapping
     public ResponseEntity<User> deleteUser(@RequestParam Long chatId) {
         User user = userService.deleteUser(chatId);
         if (user == null) {
