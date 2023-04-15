@@ -8,6 +8,10 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
+/**
+ * Класс-сервис работы с сущностью пользователь
+ * @author Sharapov Yuri
+ */
 @Service
 public class UserService {
 
@@ -42,6 +46,15 @@ public class UserService {
         return userRepository.findById(chatId).orElse(null);
     }
 
+    /**
+     * Метод назначения пользователя хозяином или лишения его собаки.
+     * Если передается кличка собаки ({@code dogName}), то пользователь становится ее хозяином.
+     * Если передается <u>null</u> ({@code dogName == null}), то пользователь лишается собаки.
+     * @throws java.util.NoSuchElementException - пользователь не найден
+     * @param chatId идентификатор чата пользователя
+     * @param dogName кличка собаки
+     * @return {@link User}
+     */
     @Transactional
     public User moveDog(Long chatId, String dogName) {
         User user = userRepository.findById(chatId).orElseThrow();

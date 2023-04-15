@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 
+/**
+ * Класс обработки <i>периодических</i> проверок параметров пользователей
+ * @author Sharapov Yuri
+ */
 @Component
 public class NotificationTimer {
 
@@ -19,6 +23,10 @@ public class NotificationTimer {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Проверка <b>раз в день</b>, у кого из пользователей закончился испытательный срок.
+     * <br> {@link UserRepository#findUsersByDaysTrialNotNull()}
+     */
     @Scheduled(cron = "0 23 13 * * ?")
     @Transactional
     public void endTrial() {

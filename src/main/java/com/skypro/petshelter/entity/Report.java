@@ -6,6 +6,11 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "reports")
 public class Report {
+
+    /**
+     * Уникальный идентификатор отчета, состоящий из даты отправки отчета и идентификатора пользователя.
+     * Если при отправке отчета такой будет найден в таблице, то найденная запись модифицируется
+     */
     @Id
     @Column(name = "date_chat_id", nullable = false)
     private String dateChatId;
