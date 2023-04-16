@@ -5,11 +5,14 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.SendPhoto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -83,6 +86,76 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     telegramBot.execute(reply);
                 }
 
+                if ("О приюте".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            """
+                                    Наш приют самый лучший в Астане!
+                                    Мы заботимся о животных как на территории, так и после усыновления.
+                                    Более 300 счастливых животных обрели счастливых хозяев!
+                                    """);
+                    telegramBot.execute(reply);
+                }
+
+                if ("Как нас найти".equals(text)) {
+                    telegramBot.execute(new SendPhoto(chatId, new File("src/main/resources/route.jpg"))
+                            .caption("Три дня полем, три дня лесом."));
+                }
+
+                if ("Техника безопасности на территории".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "Бот может выдать общие рекомендации о технике безопасности на территории приюта.");
+                    telegramBot.execute(reply);
+                }
+
+                if ("Правила знакомства с собакой".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "Бот может выдать правила знакомства с собакой до того, как можно забрать ее из приюта.");
+                    telegramBot.execute(reply);
+                }
+
+                if ("Список необходимых документов".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "Бот может выдать список документов, необходимых для того, чтобы взять собаку из приюта.");
+                    telegramBot.execute(reply);
+                }
+
+                if ("Рекомендации по транспортировке".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "Бот может выдать список рекомендаций по транспортировке животного.");
+                    telegramBot.execute(reply);
+                }
+
+                if ("Обустройство дома щенка".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "Бот может выдать список рекомендаций по обустройству дома для щенка.");
+                    telegramBot.execute(reply);
+                }
+
+                if ("Если у собаки ограничены возможности".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "Бот может выдать список рекомендаций по обустройству дома для собаки с ограниченными " +
+                                    "возможностями (зрение, передвижение).");
+                    telegramBot.execute(reply);
+                }
+
+                if ("Советы кинолога по первичному общению".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "Бот может выдать советы кинолога по первичному общению с собакой.");
+                    telegramBot.execute(reply);
+                }
+
+                if ("Кинологи, которым мы доверяем".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "Бот может выдать рекомендации по проверенным кинологам для дальнейшего обращения к ним.");
+                    telegramBot.execute(reply);
+                }
+
+                if ("Почему мы можем отказать".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "Бот может выдать список причин, почему могут отказать и не дать забрать собаку из приюта. ");
+                    telegramBot.execute(reply);
+                }
+
                 if ("/contact".equals(text) || "Оставьте ваши контактные данные".equals(text)) {
                     SendMessage reply = new SendMessage(chatId,
                             "Напишите номер телефона в международном формате (только цифры)");
@@ -103,7 +176,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                                 "Ваш номер не внесен в базу, неверный формат");
                     }
                     telegramBot.execute(reply);
-
                 }
 
             });
