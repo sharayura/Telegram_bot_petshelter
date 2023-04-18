@@ -5,22 +5,14 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -198,24 +190,50 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
                 if ("/photo".equals(lastCommand) && update.message().photo() != null) {
                     lastCommand = null;
-                    PhotoSize photo = update.message().photo()[update.message().photo().length - 1];  // Берем самый лучший по качеству файл
-                    String url = "https://api.telegram.org/file/bot"
-                            + telegramBot.getToken() + "/"
-                            + telegramBot.execute(new GetFile(photo.fileId())).file().filePath();
-
-                    File file = new File("src/main/resources/temp.jpg");
-                    try {
-                        InputStream in = new URL(url).openStream();
-                        Files.copy(in, Paths.get(file.getPath()), StandardCopyOption.REPLACE_EXISTING);
-                    } catch (Exception e) {
-                        logger.error(e.getMessage(), e);
-                    }
+                    PhotoSize[] photoArray = update.message().photo();
+                    File file = telegramBotUpdatesService.getFileFromPhotoSizeArray(photoArray);
                     reportService.savePhoto(chatId, file);
-
-//                    telegramBot.execute(new SendMessage(chatId, url));
-//                    telegramBot.execute(new SendPhoto(chatId, file));
                 }
 
+                if ("/ration".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "В следующем сообщении опишите сегодняшний рацион собаки");
+                    telegramBot.execute(reply);
+                    lastCommand = "/ration";
+                    return;
+                }
+
+                if ("/ration".equals(lastCommand) && text != null) {
+                    lastCommand = null;
+                    reportService.saveRation(chatId, text);
+                }
+
+                if ("/health".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "В следующем сообщении опишите общее самочувствие и привыкание к новому месту");
+                    telegramBot.execute(reply);
+                    lastCommand = "/health";
+                    return;
+                }
+
+                if ("/health".equals(lastCommand) && text != null) {
+                    lastCommand = null;
+                    reportService.saveHealth(chatId, text);
+                }
+
+                if ("/habits".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "В следующем сообщении опишите изменение в поведении: " +
+                                    "отказ от старых привычек, приобретение новых");
+                    telegramBot.execute(reply);
+                    lastCommand = "/habits";
+                    return;
+                }
+
+                if ("/habits".equals(lastCommand) && text != null) {
+                    lastCommand = null;
+                    reportService.saveHabits(chatId, text);
+                }
             });
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

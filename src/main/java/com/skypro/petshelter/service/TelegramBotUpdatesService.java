@@ -1,9 +1,21 @@
 package com.skypro.petshelter.service;
 
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
+import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.skypro.petshelter.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @Service
 public class TelegramBotUpdatesService {
@@ -11,11 +23,14 @@ public class TelegramBotUpdatesService {
     private final UserService userService;
     private final VolunteersService volunteersService;
     private final UserRepository userRepository;
+    private final TelegramBot telegramBot;
+    private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesService.class);
 
-    public TelegramBotUpdatesService(UserService userService, VolunteersService volunteersService, UserRepository userRepository) {
+    public TelegramBotUpdatesService(UserService userService, VolunteersService volunteersService, UserRepository userRepository, TelegramBot telegramBot) {
         this.userService = userService;
         this.volunteersService = volunteersService;
         this.userRepository = userRepository;
+        this.telegramBot = telegramBot;
     }
 
     public SendMessage start(Long chatId, String userName) {
@@ -72,5 +87,20 @@ public class TelegramBotUpdatesService {
         volunteersService.call(userName, contacts);
     }
 
+    public File getFileFromPhotoSizeArray(PhotoSize[] photoArray ) {
+        PhotoSize photo = photoArray[photoArray.length - 1];  // Берем самый лучший по качеству файл
+        String url = "https://api.telegram.org/file/bot"
+                + telegramBot.getToken() + "/"
+                + telegramBot.execute(new GetFile(photo.fileId())).file().filePath();
+
+        File file = new File("src/main/resources/temp.jpg");
+        try {
+            InputStream in = new URL(url).openStream();
+            Files.copy(in, Paths.get(file.getPath()), StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return file;
+    }
 
 }

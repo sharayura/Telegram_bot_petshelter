@@ -1,5 +1,7 @@
 package com.skypro.petshelter.service;
 
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.request.SendMessage;
 import com.skypro.petshelter.entity.Report;
 import com.skypro.petshelter.repositories.ReportRepository;
 import org.slf4j.Logger;
@@ -17,10 +19,12 @@ import java.util.List;
 public class ReportService {
 
     private final ReportRepository reportRepository;
-    private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
+    private final TelegramBot telegramBot;
+    private final Logger logger = LoggerFactory.getLogger(ReportService.class);
 
-    public ReportService(ReportRepository reportRepository) {
+    public ReportService(ReportRepository reportRepository, TelegramBot telegramBot) {
         this.reportRepository = reportRepository;
+        this.telegramBot = telegramBot;
     }
 
     public List<Report> getReportsByChatId(Long chatId) {
@@ -37,6 +41,23 @@ public class ReportService {
 
     public Boolean isReportPresent(Long chatId, LocalDate date) {
         return reportRepository.findById(parseDateChatId(chatId, date)).isPresent();
+    }
+
+    public String replyToReport(Report report) {
+        String message = "Спасибо!";
+        if (report.getPhoto() == null) {
+            message = message + " Отправьте сегодняшнее фото животного /photo .";
+        }
+        if (report.getRation() == null) {
+            message = message + " Опишите сегодняшний рацион животного /ration .";
+        }
+        if (report.getHealth() == null) {
+            message = message + " Опишите сегодняшнее самочувствие животного /health .";
+        }
+        if (report.getHabits() == null) {
+            message = message + " Опишите сегодняшние изменения в поведении животного /habits .";
+        }
+        return message;
     }
 
 
@@ -62,23 +83,28 @@ public class ReportService {
             logger.error(e.getMessage(), e);
         }
         report.setPhoto(data);
-
+        telegramBot.execute(new SendMessage(chatId, replyToReport(report)));
     }
 
+    @Transactional
+    public void saveRation(Long chatId, String text) {
+        Report report = createReport(chatId);
+        report.setRation(text);
+        telegramBot.execute(new SendMessage(chatId, replyToReport(report)));
+    }
 
-//    public void imageResizer() {
-//        try {
-//            BufferedImage originalImage = ImageIO.read(new File("original.jpg"));
-//            int newWidth = 800; // задайте новую ширину
-//            int newHeight = (int) Math.round(originalImage.getHeight() * newWidth / (double) originalImage.getWidth());
-//            BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
-//            Graphics2D g = resizedImage.createGraphics();
-//            g.drawImage(originalImage, 0, 0, newWidth, newHeight, null);
-//            g.dispose();
-//            ImageIO.write(resizedImage, "jpg", new File("resized.jpg"));
-//        } catch (Exception e) {
-//            logger.error("Ошибка обработки фото: " + e.getMessage(), e);
-//        }
-//    }
+    @Transactional
+    public void saveHealth(Long chatId, String text) {
+        Report report = createReport(chatId);
+        report.setHealth(text);
+        telegramBot.execute(new SendMessage(chatId, replyToReport(report)));
+    }
+
+    @Transactional
+    public void saveHabits(Long chatId, String text) {
+        Report report = createReport(chatId);
+        report.setHabits(text);
+        telegramBot.execute(new SendMessage(chatId, replyToReport(report)));
+    }
 
 }

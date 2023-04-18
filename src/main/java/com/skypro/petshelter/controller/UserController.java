@@ -1,7 +1,6 @@
 package com.skypro.petshelter.controller;
 
 import com.skypro.petshelter.entity.User;
-import com.skypro.petshelter.entity.Volunteer;
 import com.skypro.petshelter.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
