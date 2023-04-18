@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Objects;
 
 @Entity
 @Table(name = "volunteers")
@@ -40,5 +41,18 @@ public class Volunteer {
 
     public void setContact(String contact) {
         this.contact = contact;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Volunteer volunteer = (Volunteer) o;
+        return Objects.equals(chatId, volunteer.chatId) && Objects.equals(name, volunteer.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(chatId, name);
     }
 }

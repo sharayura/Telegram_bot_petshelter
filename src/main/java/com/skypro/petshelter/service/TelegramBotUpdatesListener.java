@@ -3,16 +3,24 @@ package com.skypro.petshelter.service;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -22,15 +30,17 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private final TelegramBotUpdatesService telegramBotUpdatesService;
     private final UserService userService;
+    private final ReportService reportService;
     private String lastCommand;
     private static final Pattern CONTACT_PATTERN = Pattern.compile("^\\d{11}$");
 
 
     public TelegramBotUpdatesListener(TelegramBot telegramBot,
-                                      TelegramBotUpdatesService telegramBotUpdatesService, UserService userService) {
+                                      TelegramBotUpdatesService telegramBotUpdatesService, UserService userService, ReportService reportService) {
         this.telegramBot = telegramBot;
         this.telegramBotUpdatesService = telegramBotUpdatesService;
         this.userService = userService;
+        this.reportService = reportService;
     }
 
     @PostConstruct
@@ -176,6 +186,34 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                                 "Ваш номер не внесен в базу, неверный формат");
                     }
                     telegramBot.execute(reply);
+                }
+
+                if ("/photo".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "В следующем сообщении прикрепите одно фото, отправьте со сжатием!");
+                    telegramBot.execute(reply);
+                    lastCommand = "/photo";
+                    return;
+                }
+
+                if ("/photo".equals(lastCommand) && update.message().photo() != null) {
+                    lastCommand = null;
+                    PhotoSize photo = update.message().photo()[update.message().photo().length - 1];  // Берем самый лучший по качеству файл
+                    String url = "https://api.telegram.org/file/bot"
+                            + telegramBot.getToken() + "/"
+                            + telegramBot.execute(new GetFile(photo.fileId())).file().filePath();
+
+                    File file = new File("src/main/resources/temp.jpg");
+                    try {
+                        InputStream in = new URL(url).openStream();
+                        Files.copy(in, Paths.get(file.getPath()), StandardCopyOption.REPLACE_EXISTING);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                    reportService.savePhoto(chatId, file);
+
+//                    telegramBot.execute(new SendMessage(chatId, url));
+//                    telegramBot.execute(new SendPhoto(chatId, file));
                 }
 
             });

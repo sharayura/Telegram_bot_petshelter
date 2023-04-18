@@ -50,16 +50,27 @@ public class TelegramBotUpdatesService {
     }
 
     public SendMessage stage3(Long chatId) {
-        return new SendMessage(chatId, "Чем я могу помочь?")
+        String reply = "Чем я могу помочь?";
+        if (userRepository.findById(chatId).orElseThrow().getDaysTrial() != null) {
+            reply = """
+                    Для отправки отчета выберите тип информации:
+                    /photo - фотография животного,
+                    /ration - сегодняшний рацион,
+                    /health - общее самочувствие и привыкание к новому месту,
+                    /habits - изменение в поведении: отказ от старых привычек, приобретение новых.
+                    Повторная отправка затрет отправленную ранее сегодняшнюю информацию соответствующего типа.
+                    """;
+        }
+        return new SendMessage(chatId, reply)
                 .replyMarkup(new ReplyKeyboardMarkup(new String[][]{
                         {"Форма ежедневного отчета", "Позвать волонтера"}
                 }).resizeKeyboard(true));
     }
 
-    public void call(String userName, Long chatId){
-            String contacts = userRepository.findById(chatId).orElseThrow().getContact();
-            volunteersService.call(userName, contacts);
-        }
+    public void call(String userName, Long chatId) {
+        String contacts = userRepository.findById(chatId).orElseThrow().getContact();
+        volunteersService.call(userName, contacts);
+    }
 
 
 }
