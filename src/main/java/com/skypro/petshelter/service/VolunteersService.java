@@ -37,13 +37,13 @@ public class VolunteersService {
         return volunteer;
     }
 
-    public void call(String userName, String contacts) {
+    public void callVolunteer(String userName, String contacts, String alert) {
         volunteerRepository.findAll().forEach(volunteer -> {
             SendMessage message = new SendMessage(volunteer.getChatId(),
-                    "Пожалуйста, свяжитесь с @" + userName + ". Контактные данные: " + contacts);
+                    "Пожалуйста, свяжитесь с " + userName + ". Контактные данные: " + contacts +
+                    ". " + alert);
             telegramBot.execute(message);
 
         });
-
     }
 }

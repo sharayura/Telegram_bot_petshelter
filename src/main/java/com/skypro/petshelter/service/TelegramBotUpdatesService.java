@@ -84,7 +84,7 @@ public class TelegramBotUpdatesService {
 
     public void call(String userName, Long chatId) {
         String contacts = userRepository.findById(chatId).orElseThrow().getContact();
-        volunteersService.call(userName, contacts);
+        volunteersService.callVolunteer(userName, contacts, "");
     }
 
     public File getFileFromPhotoSizeArray(PhotoSize[] photoArray ) {

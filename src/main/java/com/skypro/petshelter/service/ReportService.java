@@ -43,6 +43,15 @@ public class ReportService {
         return reportRepository.findById(parseDateChatId(chatId, date)).isPresent();
     }
 
+    public Report getReport(Long chatId, LocalDate date) {
+        return reportRepository.findById(parseDateChatId(chatId, date)).orElse(null);
+    }
+
+    public boolean hasReportAnyNull(Report report) {
+        return report.getHabits() == null || report.getRation() == null ||
+                report.getPhoto() == null || report.getHealth() == null;
+    }
+
     public String replyToReport(Report report) {
         String message = "Спасибо!";
         if (report.getPhoto() == null) {
