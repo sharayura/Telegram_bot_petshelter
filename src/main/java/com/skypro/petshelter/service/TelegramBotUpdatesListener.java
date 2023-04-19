@@ -3,6 +3,7 @@ package com.skypro.petshelter.service;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -22,15 +22,17 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private final TelegramBotUpdatesService telegramBotUpdatesService;
     private final UserService userService;
+    private final ReportService reportService;
     private String lastCommand;
     private static final Pattern CONTACT_PATTERN = Pattern.compile("^\\d{11}$");
 
 
     public TelegramBotUpdatesListener(TelegramBot telegramBot,
-                                      TelegramBotUpdatesService telegramBotUpdatesService, UserService userService) {
+                                      TelegramBotUpdatesService telegramBotUpdatesService, UserService userService, ReportService reportService) {
         this.telegramBot = telegramBot;
         this.telegramBotUpdatesService = telegramBotUpdatesService;
         this.userService = userService;
+        this.reportService = reportService;
     }
 
     @PostConstruct
@@ -178,6 +180,60 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     telegramBot.execute(reply);
                 }
 
+                if ("/photo".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "В следующем сообщении прикрепите одно фото, отправьте со сжатием!");
+                    telegramBot.execute(reply);
+                    lastCommand = "/photo";
+                    return;
+                }
+
+                if ("/photo".equals(lastCommand) && update.message().photo() != null) {
+                    lastCommand = null;
+                    PhotoSize[] photoArray = update.message().photo();
+                    File file = telegramBotUpdatesService.getFileFromPhotoSizeArray(photoArray);
+                    reportService.savePhoto(chatId, file);
+                }
+
+                if ("/ration".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "В следующем сообщении опишите сегодняшний рацион собаки");
+                    telegramBot.execute(reply);
+                    lastCommand = "/ration";
+                    return;
+                }
+
+                if ("/ration".equals(lastCommand) && text != null) {
+                    lastCommand = null;
+                    reportService.saveRation(chatId, text);
+                }
+
+                if ("/health".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "В следующем сообщении опишите общее самочувствие и привыкание к новому месту");
+                    telegramBot.execute(reply);
+                    lastCommand = "/health";
+                    return;
+                }
+
+                if ("/health".equals(lastCommand) && text != null) {
+                    lastCommand = null;
+                    reportService.saveHealth(chatId, text);
+                }
+
+                if ("/habits".equals(text)) {
+                    SendMessage reply = new SendMessage(chatId,
+                            "В следующем сообщении опишите изменение в поведении: " +
+                                    "отказ от старых привычек, приобретение новых");
+                    telegramBot.execute(reply);
+                    lastCommand = "/habits";
+                    return;
+                }
+
+                if ("/habits".equals(lastCommand) && text != null) {
+                    lastCommand = null;
+                    reportService.saveHabits(chatId, text);
+                }
             });
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

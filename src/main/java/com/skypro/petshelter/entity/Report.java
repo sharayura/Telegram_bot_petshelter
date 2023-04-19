@@ -1,7 +1,10 @@
 package com.skypro.petshelter.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "reports")
@@ -23,6 +26,7 @@ public class Report {
 
     @Column
     @Lob
+    @JsonIgnore
     private byte[] photo;
 
     @Column
@@ -33,6 +37,14 @@ public class Report {
 
     @Column
     private String habits;
+
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
 
     public String getDateChatId() {
         return dateChatId;
@@ -58,14 +70,6 @@ public class Report {
         this.date = date;
     }
 
-    public byte[] getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(byte[] photo) {
-        this.photo = photo;
-    }
-
     public String getRation() {
         return ration;
     }
@@ -88,5 +92,18 @@ public class Report {
 
     public void setHabits(String habits) {
         this.habits = habits;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Report report = (Report) o;
+        return Objects.equals(dateChatId, report.dateChatId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dateChatId);
     }
 }
