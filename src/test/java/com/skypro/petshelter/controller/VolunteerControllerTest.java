@@ -24,7 +24,7 @@ public class VolunteerControllerTest {
     MockMvc mockMvc;
 
     @Test
-    void volunteerTest() throws Exception {
+    void volunteerAPITest() throws Exception {
         mockMvc.perform(
                         post("/volunteer").param("chatId", chatIdTest.toString())
                                 .param("name", nameTest)
