@@ -33,7 +33,7 @@ public class UserControllerTest {
 
         mockMvc.perform(
                         put("/user/give-dog").param("chatId", chatIdTest.toString())
-                                .param("dogName", dogNameTest.toString()))
+                                .param("dogName", dogNameTest))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dogName").value(dogNameTest));
 
@@ -45,7 +45,7 @@ public class UserControllerTest {
 
         mockMvc.perform(
                         put("/user/deprive-dog").param("chatId", chatIdTest.toString())
-                                .param("dogName", dogNameTest.toString()))
+                                .param("dogName", dogNameTest))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dogName").isEmpty());
 

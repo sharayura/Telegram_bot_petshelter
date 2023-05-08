@@ -1,7 +1,5 @@
 package com.skypro.petshelter.service;
 
-import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.request.SendMessage;
 import com.skypro.petshelter.entity.Report;
 import com.skypro.petshelter.repositories.ReportRepository;
 import org.slf4j.Logger;
@@ -19,12 +17,10 @@ import java.util.List;
 public class ReportService {
 
     private final ReportRepository reportRepository;
-    private final TelegramBot telegramBot;
     private final Logger logger = LoggerFactory.getLogger(ReportService.class);
 
-    public ReportService(ReportRepository reportRepository, TelegramBot telegramBot) {
+    public ReportService(ReportRepository reportRepository) {
         this.reportRepository = reportRepository;
-        this.telegramBot = telegramBot;
     }
 
     public List<Report> getReportsByChatId(Long chatId) {
@@ -83,7 +79,7 @@ public class ReportService {
     }
 
     @Transactional
-    public void savePhoto(Long chatId, File file) {
+    public Report savePhoto(Long chatId, File file) {
        Report report = createReport(chatId);
         byte[] data = null;
         try {
@@ -92,28 +88,28 @@ public class ReportService {
             logger.error(e.getMessage(), e);
         }
         report.setPhoto(data);
-        telegramBot.execute(new SendMessage(chatId, replyToReport(report)));
+        return report;
     }
 
     @Transactional
-    public void saveRation(Long chatId, String text) {
+    public Report  saveRation(Long chatId, String text) {
         Report report = createReport(chatId);
         report.setRation(text);
-        telegramBot.execute(new SendMessage(chatId, replyToReport(report)));
+        return report;
     }
 
     @Transactional
-    public void saveHealth(Long chatId, String text) {
+    public Report saveHealth(Long chatId, String text) {
         Report report = createReport(chatId);
         report.setHealth(text);
-        telegramBot.execute(new SendMessage(chatId, replyToReport(report)));
+        return report;
     }
 
     @Transactional
-    public void saveHabits(Long chatId, String text) {
+    public Report saveHabits(Long chatId, String text) {
         Report report = createReport(chatId);
         report.setHabits(text);
-        telegramBot.execute(new SendMessage(chatId, replyToReport(report)));
+        return report;
     }
 
 }
