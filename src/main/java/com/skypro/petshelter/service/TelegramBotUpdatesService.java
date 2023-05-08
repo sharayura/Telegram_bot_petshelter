@@ -5,11 +5,14 @@ import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.skypro.petshelter.entity.UserContext;
+import com.skypro.petshelter.repositories.UserContextRepository;
 import com.skypro.petshelter.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
@@ -23,13 +26,16 @@ public class TelegramBotUpdatesService {
     private final UserService userService;
     private final VolunteersService volunteersService;
     private final UserRepository userRepository;
+    private final UserContextRepository userContextRepository;
+
     private final TelegramBot telegramBot;
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesService.class);
 
-    public TelegramBotUpdatesService(UserService userService, VolunteersService volunteersService, UserRepository userRepository, TelegramBot telegramBot) {
+    public TelegramBotUpdatesService(UserService userService, VolunteersService volunteersService, UserRepository userRepository, UserContextRepository userContextRepository, TelegramBot telegramBot) {
         this.userService = userService;
         this.volunteersService = volunteersService;
         this.userRepository = userRepository;
+        this.userContextRepository = userContextRepository;
         this.telegramBot = telegramBot;
     }
 
@@ -103,4 +109,22 @@ public class TelegramBotUpdatesService {
         return file;
     }
 
+    public String getLastCommand(Long chatId) {
+        UserContext userContext = userContextRepository.findById(chatId).orElse(null);
+        if (userContext != null) {
+            return userContext.getLastCommand();
+        }
+        return null;
+    }
+
+    @Transactional
+    public void setLastCommand(Long chatId, String lastCommand) {
+        UserContext userContext = userContextRepository.findById(chatId).orElse(null);
+        if (userContext == null) {
+            userContext = new UserContext();
+            userContext.setChatId(chatId);
+        }
+        userContext.setLastCommand(lastCommand);
+        userContextRepository.save(userContext);
+    }
 }
