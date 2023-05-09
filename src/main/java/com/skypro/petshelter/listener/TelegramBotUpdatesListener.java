@@ -1,4 +1,4 @@
-package com.skypro.petshelter.service;
+package com.skypro.petshelter.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -8,6 +8,9 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
 import com.skypro.petshelter.entity.Report;
+import com.skypro.petshelter.service.ReportService;
+import com.skypro.petshelter.service.TelegramBotUpdatesService;
+import com.skypro.petshelter.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
