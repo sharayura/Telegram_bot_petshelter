@@ -34,7 +34,20 @@ public class TelegramBotUpdatesListenerTest {
     TelegramBot telegramBot;
 
     @Test
-    void updatesListenerTest() {
+    void updatesListenerStartTest() {
+        SendMessage actual = actualMessage("/start");
+        Assertions.assertEquals(actual.getParameters().get("text"), telegramBotUpdatesService.start(chatIdTest, nameTest).getParameters().get("text"));
+        Assertions.assertNotNull(actual.getParameters().get("reply_markup"));
+    }
+
+    @Test
+    void updatesListenerTakeTest() {
+        SendMessage actual = actualMessage("Как взять собаку");
+        Assertions.assertEquals(actual.getParameters().get("text"), telegramBotUpdatesService.stage2(chatIdTest).getParameters().get("text"));
+        Assertions.assertNotNull(actual.getParameters().get("reply_markup"));
+    }
+
+    private SendMessage actualMessage(String text) {
         Update update = mock(Update.class);
         Message message = mock(Message.class);
         Chat chat = mock(Chat.class);
@@ -45,17 +58,9 @@ public class TelegramBotUpdatesListenerTest {
 
         ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
 
-        when(message.text()).thenReturn("/start");
+        when(message.text()).thenReturn(text);
         telegramBotUpdatesListener.process(List.of(update));
         verify(telegramBot).execute(argumentCaptor.capture());
-        SendMessage actual = argumentCaptor.getValue();
-        Assertions.assertEquals(actual.getParameters().get("text"), telegramBotUpdatesService.start(chatIdTest, nameTest).getParameters().get("text"));
-
-//        when(message.text()).thenReturn("Как взять собаку");
-//        telegramBotUpdatesListener.process(List.of(update));
-//        verify(telegramBot).execute(argumentCaptor.capture());
-//        actual = argumentCaptor.getValue();
-//        Assertions.assertEquals(actual.getParameters().get("text"), telegramBotUpdatesService.stage2(chatIdTest).getParameters().get("text"));
-
+        return argumentCaptor.getValue();
     }
 }
