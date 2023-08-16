@@ -1,4 +1,4 @@
-package com.skypro.petshelter.service;
+package com.skypro.petshelter.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -7,6 +7,10 @@ import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
+import com.skypro.petshelter.entity.Report;
+import com.skypro.petshelter.service.ReportService;
+import com.skypro.petshelter.service.TelegramBotUpdatesService;
+import com.skypro.petshelter.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -23,7 +27,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final TelegramBotUpdatesService telegramBotUpdatesService;
     private final UserService userService;
     private final ReportService reportService;
-    private String lastCommand;
     private static final Pattern CONTACT_PATTERN = Pattern.compile("^\\d{11}$");
 
 
@@ -162,12 +165,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     SendMessage reply = new SendMessage(chatId,
                             "Напишите номер телефона в международном формате (только цифры)");
                     telegramBot.execute(reply);
-                    lastCommand = "/contact";
+                    telegramBotUpdatesService.setLastCommand(chatId, "/contact");
                     return;
                 }
 
-                if ("/contact".equals(lastCommand) && text != null) {
-                    lastCommand = null;
+                if ("/contact".equals(telegramBotUpdatesService.getLastCommand(chatId)) && text != null) {
+                    telegramBotUpdatesService.setLastCommand(chatId, null);
                     SendMessage reply;
                     if (CONTACT_PATTERN.matcher(text).matches()) {
                         userService.setContacts(chatId, text);
@@ -184,41 +187,44 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     SendMessage reply = new SendMessage(chatId,
                             "В следующем сообщении прикрепите одно фото, отправьте со сжатием!");
                     telegramBot.execute(reply);
-                    lastCommand = "/photo";
+                    telegramBotUpdatesService.setLastCommand(chatId, "/photo");
                     return;
                 }
 
-                if ("/photo".equals(lastCommand) && update.message().photo() != null) {
-                    lastCommand = null;
+                if ("/photo".equals(telegramBotUpdatesService.getLastCommand(chatId)) && update.message().photo() != null) {
+                    telegramBotUpdatesService.setLastCommand(chatId, null);
                     PhotoSize[] photoArray = update.message().photo();
                     File file = telegramBotUpdatesService.getFileFromPhotoSizeArray(photoArray);
-                    reportService.savePhoto(chatId, file);
+                    Report report = reportService.savePhoto(chatId, file);
+                    telegramBot.execute(new SendMessage(chatId, reportService.replyToReport(report)));
                 }
 
                 if ("/ration".equals(text)) {
                     SendMessage reply = new SendMessage(chatId,
                             "В следующем сообщении опишите сегодняшний рацион собаки");
                     telegramBot.execute(reply);
-                    lastCommand = "/ration";
+                    telegramBotUpdatesService.setLastCommand(chatId, "/ration");
                     return;
                 }
 
-                if ("/ration".equals(lastCommand) && text != null) {
-                    lastCommand = null;
-                    reportService.saveRation(chatId, text);
+                if ("/ration".equals(telegramBotUpdatesService.getLastCommand(chatId)) && text != null) {
+                    telegramBotUpdatesService.setLastCommand(chatId, null);
+                    Report report = reportService.saveRation(chatId, text);
+                    telegramBot.execute(new SendMessage(chatId, reportService.replyToReport(report)));
                 }
 
                 if ("/health".equals(text)) {
                     SendMessage reply = new SendMessage(chatId,
                             "В следующем сообщении опишите общее самочувствие и привыкание к новому месту");
                     telegramBot.execute(reply);
-                    lastCommand = "/health";
+                    telegramBotUpdatesService.setLastCommand(chatId, "/health");
                     return;
                 }
 
-                if ("/health".equals(lastCommand) && text != null) {
-                    lastCommand = null;
-                    reportService.saveHealth(chatId, text);
+                if ("/health".equals(telegramBotUpdatesService.getLastCommand(chatId)) && text != null) {
+                    telegramBotUpdatesService.setLastCommand(chatId, null);
+                    Report report = reportService.saveHealth(chatId, text);
+                    telegramBot.execute(new SendMessage(chatId, reportService.replyToReport(report)));
                 }
 
                 if ("/habits".equals(text)) {
@@ -226,13 +232,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             "В следующем сообщении опишите изменение в поведении: " +
                                     "отказ от старых привычек, приобретение новых");
                     telegramBot.execute(reply);
-                    lastCommand = "/habits";
+                    telegramBotUpdatesService.setLastCommand(chatId, "/habits");
                     return;
                 }
 
-                if ("/habits".equals(lastCommand) && text != null) {
-                    lastCommand = null;
-                    reportService.saveHabits(chatId, text);
+                if ("/habits".equals(telegramBotUpdatesService.getLastCommand(chatId)) && text != null) {
+                    telegramBotUpdatesService.setLastCommand(chatId, null);
+                    Report report = reportService.saveHabits(chatId, text);
+                    telegramBot.execute(new SendMessage(chatId, reportService.replyToReport(report)));
                 }
             });
         } catch (Exception e) {
